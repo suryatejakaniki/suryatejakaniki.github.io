@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Surya Teja: threat-hunting labs</title>
+<meta name="description" content="Hands-on labs built from public threat reporting. Each one gives you a hypothesis, synthetic Microsoft Sentinel and Defender XDR data and real KQL, and ends with a timeline and an assessment you can check.">
+<link rel="canonical" href="https://suryatejakaniki.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Surya Teja: threat-hunting labs">
+<meta property="og:description" content="Hands-on labs built from public threat reporting. Each one gives you a hypothesis, synthetic Microsoft Sentinel and Defender XDR data and real KQL, and ends with a timeline and an assessment you can check.">
+<meta property="og:url" content="https://suryatejakaniki.github.io/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307111d'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%232583ff' stroke-width='3'/%3E%3Cpath d='M19.5 19.5l6 6' stroke='%2328dfc8' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preload" href="/assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <a class="wordmark" href="/">Surya Teja</a>
+  <nav aria-label="Site">
+    <a href="/#labs">Labs</a>
+    <a href="/#writing">Writing</a>
+    <a href="/#about">About</a>
+  </nav>
+</header>
+<main id="main" class="home">
+  <section class="intro">
+    <h1>Threat hunts you can run in your browser</h1>
+    <p class="lede">Hands-on labs built from public threat reporting. Each one gives you a hypothesis, synthetic Microsoft Sentinel and Defender XDR data and real KQL, and ends with a timeline and an assessment you can check.</p>
+  </section>
+  <section id="labs" aria-labelledby="labs-h">
+    <h2 id="labs-h">Labs</h2>
+    <article class="lab" aria-labelledby="lab-01">
+  <div class="lab-main">
+    <p class="lab-number">Lab 01</p>
+    <h3 id="lab-01"><a href="/labs/s01/">Help desk MFA reset to SaaS data export</a></h3>
+    <p class="lab-sub">Find an identity takeover that started with a phone call</p>
+    <dl class="lab-facts">
+      <div><dt>Level</dt><dd>Intermediate</dd></div>
+      <div><dt>Time</dt><dd>About 60 minutes</dd></div>
+      <div><dt>Steps</dt><dd>7 queries, a timeline, an assessment</dd></div>
+      <div><dt>Access</dt><dd>Free with sign-in</dd></div>
+    </dl>
+    <p class="lab-links"><a class="button" href="/labs/s01/">Open the lab</a><a href="/blog/helpdesk-mfa-reset-hunt/">Read the write-up</a></p>
+  </div>
+  <div class="lab-tables">
+    <p id="rail-01">Tables you hunt across</p>
+    <ul class="rail" aria-labelledby="rail-01"><li class="rail-ticket"><code>Lab_HelpdeskTickets</code></li><li class="rail-audit"><code>AuditLogs</code></li><li class="rail-signin"><code>SigninLogs</code></li><li class="rail-crm"><code>CloudAppEvents</code></li><li class="rail-warehouse"><code>Lab_WarehouseQueries</code></li></ul>
+  </div>
+</article>
+  </section>
+  <section id="writing" aria-labelledby="writing-h">
+    <h2 id="writing-h">Writing</h2>
+    <ul class="posts"><li>
+      <time datetime="2026-10-19">19 October 2026</time>
+      <a href="/blog/helpdesk-mfa-reset-hunt/">Hunting a help desk MFA reset that ends in a SaaS data export</a>
+      <p>A hands-on KQL lab: find an identity takeover that started with a phone call, using synthetic Entra ID, Defender for Cloud Apps, ticketing and warehouse data.</p>
+    </li></ul>
+  </section>
+  <section id="about" aria-labelledby="about-h">
+    <h2 id="about-h">About</h2>
+    <div class="about"><p>I&#39;m a threat hunter and detection engineer. I write for Microsoft Sentinel, Defender XDR and KQL, for people who hunt, build detections or run a SOC.</p>
+<p>Every lab starts from attributed public reporting and runs on synthetic data, so you can work through a real attack pattern without touching anyone&#39;s tenant.</p></div>
+    <ul class="links"><li><a href="https://github.com/suryatejakaniki">GitHub</a></li><li><a href="https://medium.com/@suryatejakaniki">Medium</a></li></ul>
+  </section>
+</main>
+<footer class="site-foot">
+  <p>All lab data is synthetic: reserved example domains, documentation IP ranges and fictional phone numbers. People and organizations in the labs are invented.</p>
+  <p>These pages set no cookies and load nothing from other sites. The labs need a free sign-in: <a href="/privacy/">privacy note</a>.</p>
+</footer>
+</body>
+</html>

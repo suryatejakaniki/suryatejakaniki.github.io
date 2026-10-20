@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://suryatejakaniki.github.io/sitemap.xml
