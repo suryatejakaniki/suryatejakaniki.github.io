@@ -32,6 +32,8 @@
   --muted: #9fb5cc;
   --link: #7cc0ff;
   --blue: #2583ff;
+  /* filled buttons with white text: 5.36:1 contrast (WCAG AA needs 4.5:1); #2583ff gave 3.64:1 */
+  --blue-fill: #1a66d6;
   --teal: #28dfc8;
   --purple: #b58aff;
   --orange: #ff9b52;
@@ -54,7 +56,7 @@ a { color: var(--link); text-underline-offset: 0.18em; text-decoration-thickness
 a:hover { color: #a9d6ff; }
 a:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 3px; }
 code { font-family: var(--mono); font-size: 0.88em; color: var(--text); }
-.skip { position: absolute; left: -999px; top: 8px; background: var(--blue); color: #fff; padding: 8px 12px; border-radius: 6px; z-index: 10; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--blue-fill); color: #fff; padding: 8px 12px; border-radius: 6px; z-index: 10; }
 .skip:focus { left: 8px; }
 
 /* header and footer */
@@ -110,7 +112,7 @@ code { font-family: var(--mono); font-size: 0.88em; color: var(--text); }
   display: inline-block;
   padding: 0.6rem 1.1rem;
   border-radius: 8px;
-  background: var(--blue);
+  background: var(--blue-fill);
   color: #fff;
   font-weight: 600;
   text-decoration: none;
