@@ -1,0 +1,1 @@
+import{d as e,f as t}from"./index.esm-CHBWOuEL.js";t(`firebase`,`13.0.0`,`app`);export{e as initializeApp};
