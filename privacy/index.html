@@ -37,8 +37,8 @@
 <h2>What is collected when you sign in</h2>
 <ul>
 <li><strong>From the sign-in method you choose</strong> (Google, GitHub or a link sent to your email): an account ID, your email address and your display name. Sign-in is handled by Google&#39;s Firebase Authentication. This site never sees your password.</li>
-<li><strong>On the lab server:</strong> when you joined, when you last used a lab, whether you asked to hear about new labs, and what you did in each lab: opening it, completing steps, using hints, showing reference queries, checking the timeline and the assessment. Your queries are run, but their text is not stored.</li>
-<li><strong>In your browser:</strong> your progress (queries, pinned rows and answers) is saved in your browser&#39;s storage so you can pick up where you left off. It stays on your device.</li>
+<li><strong>On the lab server:</strong> when you joined, when you last used a lab, whether you asked to hear about new labs, and what you did in each lab: opening it, completing steps, using hints, showing reference queries, checking the timeline and the assessment. Each of these is recorded once, the first time. For the daily limit, the server also counts how many queries you ran each day and how many result rows they showed. Your queries are run, but their text is not stored.</li>
+<li><strong>In your browser:</strong> your progress (queries, pinned rows and answers) is saved in your browser&#39;s storage so you can pick up where you left off. It stays on your device, and it stays after you sign out unless you tick <strong>Also clear my progress on this device</strong> when you sign out. On a shared computer, tick it.</li>
 </ul>
 <h2>Why</h2>
 <p>To give subscribers access to the labs, to keep your place, to see how the labs are used so they can be improved, and, only if you tick the box, to email you when a new lab is published.</p>
@@ -48,14 +48,16 @@
 <li>Cloudflare runs the lab server and its database.</li>
 </ul>
 <p>Your details are not sold or shared with anyone else. There are no ads and no tracking cookies.</p>
+<h2>How long it is kept</h2>
+<p>Your subscriber record, lab activity and daily counts are kept until you delete your account. Sign-in accounts are kept by Firebase until you delete your account.</p>
 <h2>Your choices</h2>
 <ul>
 <li>Turn lab announcements on or off at any time under <strong>Account</strong> in the lab.</li>
-<li>Delete your account in the lab under <strong>Account</strong>, then <strong>Delete my account</strong>. This removes your subscriber record and your lab activity from the lab server and deletes your sign-in account.</li>
+<li>Delete your account in the lab under <strong>Account</strong>, then <strong>Delete my account</strong>. This removes your subscriber record, your lab activity and your daily counts from the lab server, deletes your sign-in account, and clears your saved progress from this browser.</li>
 <li>Clear this site&#39;s data in your browser to remove saved progress.</li>
 </ul>
 <h2>Fair use</h2>
-<p>Each account can run up to 400 queries a day. Accounts that misuse the labs, for example by trying to copy their data in bulk, can be blocked.</p>
+<p>Each account can run up to 400 queries a day. The daily row counts show when an account reads far more data than a lab needs; accounts that misuse the labs, for example by copying their data in bulk, can be blocked.</p>
 <p>Questions about this note can be sent through the GitHub profile linked on the home page.</p>
 
     </div>
