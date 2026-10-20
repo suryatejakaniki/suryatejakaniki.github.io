@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Hunting a help desk MFA reset that ends in a SaaS data export</title>
+<meta name="description" content="A hands-on KQL lab: find an identity takeover that started with a phone call, using synthetic Entra ID, Defender for Cloud Apps, ticketing and warehouse data.">
+<link rel="canonical" href="https://suryatejakaniki.github.io/blog/helpdesk-mfa-reset-hunt/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hunting a help desk MFA reset that ends in a SaaS data export">
+<meta property="og:description" content="A hands-on KQL lab: find an identity takeover that started with a phone call, using synthetic Entra ID, Defender for Cloud Apps, ticketing and warehouse data.">
+<meta property="og:url" content="https://suryatejakaniki.github.io/blog/helpdesk-mfa-reset-hunt/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307111d'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%232583ff' stroke-width='3'/%3E%3Cpath d='M19.5 19.5l6 6' stroke='%2328dfc8' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preload" href="/assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <a class="wordmark" href="/">Surya Teja</a>
+  <nav aria-label="Site">
+    <a href="/#labs">Labs</a>
+    <a href="/#writing">Writing</a>
+    <a href="/#about">About</a>
+  </nav>
+</header>
+<main id="main" class="post">
+  <article>
+    <header class="post-head">
+      <p class="post-meta"><time datetime="2026-10-19">19 October 2026</time><span>5 min read</span></p>
+      <h1>Hunting a help desk MFA reset that ends in a SaaS data export</h1>
+      <p class="lede">A hands-on KQL lab: find an identity takeover that started with a phone call, using synthetic Entra ID, Defender for Cloud Apps, ticketing and warehouse data.</p>
+    </header>
+    <div class="prose">
+<p>A caller tells the service desk she has a new phone and can&#39;t approve sign-ins. The agent asks a few questions, removes her authenticator and resets her password. Ten minutes later someone registers a new authenticator for her account and signs in to the CRM. Nothing in that sequence is malware, and every step is an action the identity platform was built to allow.</p>
+<p>I built a lab around this pattern. You work through it in the browser with real KQL against a fixed synthetic dataset, and it takes about an hour. It is free with a sign-in.</p>
+<h2>The pattern in public reporting</h2>
+<p>Several teams have described the same opening move over the last three years:</p>
+<ul>
+<li><strong>Okta Security</strong> reported on 31 August 2023 that between 29 July and 19 August 2023, callers asked IT service desks at several of its US customers to reset all MFA factors for highly privileged users.</li>
+<li><strong>Microsoft Threat Intelligence</strong> reported on 25 October 2023 that Octo Tempest calls help desks to get passwords reset and MFA methods changed or added, and that it copied CRM and support-desk data through third-party data connectors.</li>
+<li><strong>FBI and CISA</strong> reported in advisory AA23-320A (November 2023, revised July 2025) that Scattered Spider social-engineers IT help desks into resetting passwords and MFA tokens and then registers its own MFA tokens.</li>
+<li><strong>Mandiant</strong> reported on 13 June 2024 that UNC3944 called service desks claiming a new phone, passed verification using personal details such as the last four digits of a Social Security number and a manager&#39;s name, then used single sign-on to reach SaaS applications and move their data to attacker-owned cloud storage.</li>
+</ul>
+<p>The lab generalizes from these reports. None of them describes the exact path the lab uses into a cloud data warehouse; in the lab, the warehouse stands for &quot;a SaaS data source reached through single sign-on&quot;. No real organization is modeled.</p>
+<h2>Why it is hard to hunt</h2>
+<p>Every step looks like routine administration. An agent deleting a user&#39;s authentication method and resetting a password is what a lost-phone ticket is supposed to produce. Once the caller registers their own authenticator, sign-ins show MFA satisfied, so a detection built on MFA failures sees nothing after the first prompt.</p>
+<p>The evidence that matters most sits outside the usual SIEM tables. Whether the caller was verified, and whether they called from the number on file, lives in the ticketing system. Many workspaces don&#39;t ingest it.</p>
+<p>Volume doesn&#39;t help much either. A large CRM export on the last day of a quarter is normal, and a nightly ETL job moves more warehouse data than any attacker in the lab.</p>
+<p>Network logs are the obvious thing to ask for, and they would not have helped. Mandiant&#39;s 2024 report makes the point that firewall and netflow logs are ineffective for detecting large outbound transfers from SaaS platforms: the data moves between cloud services and an outside client, not through the corporate network. The lab has no proxy or firewall logs on purpose, and the final assessment asks what that gap does and does not hide.</p>
+<h2>The hypothesis</h2>
+<p>If an attacker obtained an MFA reset by calling the service desk, then within hours of an admin deleting a user&#39;s authentication method we expect:</p>
+<ol>
+<li>a help desk ticket for that user without strong verification,</li>
+<li>a new security-info registration from a network the user has not used,</li>
+<li>successful MFA sign-ins from that network to SaaS apps, and</li>
+<li>bulk export activity in those apps that is new for the user from that network.</li>
+</ol>
+<h2>What the lab asks</h2>
+<p>The lab has seven query steps, a timeline you build from pinned rows, and an assessment. These are three of the questions you can only answer by working through the data:</p>
+<ul>
+<li>In the two weeks, admins changed passwords or authentication methods on three accounts. Which fields in the ticket data separate the one that matters from a properly verified lost-phone reset?</li>
+<li>Two accounts exported far more CRM records than anyone else. What do you have to group by so the real user&#39;s routine exports don&#39;t hide the attacker&#39;s?</li>
+<li>After the attack, the real user tries to sign in. What does that look like in the data, and why is it some of the strongest evidence you have?</li>
+</ul>
+<p class="try-it"><strong>Try it:</strong> <a href="https://suryatejakaniki.github.io/labs/s01/">Help desk MFA reset to SaaS data export</a></p>
+<p>The lab runs on five tables: <code>SigninLogs</code> and <code>AuditLogs</code> from Microsoft Entra ID, <code>CloudAppEvents</code> from Defender for Cloud Apps, and two lab tables for help desk tickets and warehouse query history. Microsoft table columns were checked against Microsoft Learn. The query engine is a small KQL subset written for these labs, not Microsoft&#39;s engine, and the lab documents what it supports and where it differs.</p>
+<h2>Lessons</h2>
+<p><strong>Join identity changes to the ticket.</strong> The reset itself looks the same whether the caller was verified or not. The verification method, the verification status and whether the caller&#39;s number matched the number on file are the fields that decide it, so the ticket export is worth ingesting.</p>
+<p><strong>Group by account and network, not by account alone.</strong> An attacker using a real user&#39;s account inherits that user&#39;s history. Summarizing by account merges the attacker&#39;s exports with the user&#39;s routine ones.</p>
+<p><strong>Look for the real user.</strong> Failed sign-ins with the old password from the office, followed by a second ticket saying &quot;my password stopped working&quot;, confirm a takeover better than any anomaly score.</p>
+<p><strong>Separate look-alikes with fields, not stories.</strong> In the lab, each benign look-alike is ruled out by data: a verified ticket with a callback to the number on file, a compliant device with a device ID, a key-pair login from an internal orchestrator. &quot;She was travelling&quot; or &quot;it&#39;s quarter end&quot; is not evidence until a field says so.</p>
+<p><strong>Name the gap and the log that closes it.</strong> The lab&#39;s data cannot show whether anyone retrieved the files copied to the outside storage location, or whether the CRM exports were downloaded. The logs that would answer that are the warehouse provider&#39;s access history for the stage, the storage provider&#39;s access logs and CRM download events. Proxy logs would not.</p>
+<h2>References</h2>
+<ul>
+<li>Okta Security, 2023-08-31: <a href="https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection">Cross-Tenant Impersonation: Prevention and Detection</a></li>
+<li>Microsoft Threat Intelligence, 2023-10-25: <a href="https://www.microsoft.com/en-us/security/blog/2023/10/25/octo-tempest-crosses-boundaries-to-facilitate-extortion-encryption-and-destruction/">Octo Tempest crosses boundaries to facilitate extortion, encryption, and destruction</a></li>
+<li>FBI and CISA, AA23-320A, 2023-11-16, revised 2025-07-29: <a href="https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a">Scattered Spider</a></li>
+<li>Mandiant, 2024-06-13: <a href="https://cloud.google.com/blog/topics/threat-intelligence/unc3944-targets-saas-applications/">UNC3944 Targets SaaS Applications</a></li>
+<li>Mandiant, 2025-05-06: <a href="https://cloud.google.com/blog/topics/threat-intelligence/unc3944-proactive-hardening-recommendations">Defending Against UNC3944: Cybercrime Hardening Guidance from the Frontlines</a></li>
+<li>MITRE ATT&amp;CK: <a href="https://attack.mitre.org/techniques/T1684/001/">T1684.001 Social Engineering: Impersonation</a>, <a href="https://attack.mitre.org/techniques/T1556/006/">T1556.006 Modify Authentication Process: Multi-Factor Authentication</a>, <a href="https://attack.mitre.org/techniques/T1537/">T1537 Transfer Data to Cloud Account</a></li>
+<li>Microsoft Learn: <a href="https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/signinlogs">SigninLogs</a>, <a href="https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/auditlogs">AuditLogs</a>, <a href="https://learn.microsoft.com/defender-xdr/advanced-hunting-cloudappevents-table">CloudAppEvents</a></li>
+</ul>
+<h2>About the data</h2>
+<p>All data in the lab and in this post is synthetic. The organization, people, tickets and events are invented. Names use example.com and the .example domain, IP addresses come from the documentation ranges 192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24 plus private 10.0.0.0/8 addresses, and phone numbers are in the fictional 555-0100 to 555-0199 range. Nothing in the lab connects to a real tenant.</p>
+
+    </div>
+  </article>
+</main>
+<footer class="site-foot">
+  <p>All lab data is synthetic: reserved example domains, documentation IP ranges and fictional phone numbers. People and organizations in the labs are invented.</p>
+  <p>These pages set no cookies and load nothing from other sites. The labs need a free sign-in: <a href="/privacy/">privacy note</a>.</p>
+</footer>
+</body>
+</html>
